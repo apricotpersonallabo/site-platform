@@ -1,19 +1,15 @@
 name: Reusable site preview
-
 on:
   workflow_call:
     inputs:
       site-directory:
         description: Product repository site source directory
-        required: false
         type: string
         default: site
       artifact-name:
         description: Artifact name for the generated preview
-        required: false
         type: string
         default: site-preview
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,7 +18,8 @@ jobs:
     steps:
       - name: Checkout product repository
         uses: actions/checkout@v4
-
+        with:
+          persist-credentials: false
       - name: Checkout shared site platform
         uses: actions/checkout@v4
         with:
@@ -30,18 +27,28 @@ jobs:
           ref: ${{ job.workflow_sha }}
           path: .site-platform-host
           persist-credentials: false
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "22"
-
-      - name: Build migration preview
-        run: node .site-platform-host/src/build.mjs --site "${{ inputs.site-directory }}" --out site-dist
-
+          node-version: '22'
+      - name: Install platform dependencies
+        run: npm ci --prefix .site-platform-host
+      - name: Install test browser
+        run: npx --prefix .site-platform-host playwright install --with-deps chromium
+      - name: Build and validate site
+        env:
+          SITE_DIRECTORY: ${{ inputs.site-directory }}
+        run: |
+          node .site-platform-host/src/build.mjs --site "$SITE_DIRECTORY" --out site-dist
+          node .site-platform-host/src/check.mjs site-dist
+      - name: Browser smoke and accessibility checks
+        working-directory: .site-platform-host
+        env:
+          SITE_DIST: ${{ github.workspace }}/site-dist
+        run: npm run test:browser
       - name: Upload migration preview
         uses: actions/upload-artifact@v4
         with:
-          name: "${{ inputs.artifact-name }}"
+          name: ${{ inputs.artifact-name }}
           path: site-dist
+          include-hidden-files: true
           if-no-files-found: error

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "product": {"name":"Sample Product", "description":"A multilingual product manual."},
+  "repository": {"url":"https://github.com/apricotpersonallabo/site-platform"},
+  "defaultLanguage":"ja", "languages":["ja","en","fr"], "favicon":"favicon.svg",
+  "pages":[
+    {"slug":"index","title":"ホーム","source":"content/ja/index.md","locales":{"en":{"title":"Home","source":"content/en/index.md"}}},
+    {"slug":"manual","title":"マニュアル","source":"content/ja/manual.md","locales":{"en":{"title":"Manual","source":"content/en/manual.md"}}}
+  ]
+}
