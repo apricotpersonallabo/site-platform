@@ -2,6 +2,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import MarkdownIt from 'markdown-it';
+import { parseFragment, serialize } from 'parse5';
 import { validateConfig } from './config.mjs';
 
 const escape = (value = '') => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
@@ -54,7 +55,9 @@ ${actualLocale !== locale ? `<p class="fallback-note">${locale === 'ja' ? 'こ�
 <article lang="${actualLocale}">${body}</article></main>
 <footer class="site-footer"><div class="shell footer-inner"><small>© ${new Date().getUTCFullYear()} ${escape(config.product.name)}</small>
 <nav class="footer-nav" aria-label="Related links"><a href="${escape(config.repository.url)}">Source</a>${config.repository.issues ? `<a href="${escape(config.repository.issues)}">Issues</a>` : ''}</nav>
-</div></footer></body></html>`;
+</div></footer>
+${(page.scripts || []).map(src => `<script src="${escape(relative(current, src))}" defer></script>`).join('\n')}
+</body></html>`;
 }
 export async function build({ site = 'site', out = 'site-dist', preview = true } = {}) {
   site = await fs.realpath(path.resolve(site)); out = path.resolve(out);
@@ -77,8 +80,19 @@ export async function build({ site = 'site', out = 'site-dist', preview = true }
     // Leading slash means site root, including when hosted under a Pages project prefix.
     const original = md.normalizeLink.bind(md);
     md.normalizeLink = url => original(url.startsWith('/') && !url.startsWith('//') ? relative(current, url.slice(1)) : url);
-    const markdown = await sourceFile(site, (translation || page).source);
-    add(current, layout(config, page, locale, actualLocale, md.render(markdown), preview));
+    const source = (translation || page).source;
+    const content = await sourceFile(site, source);
+    let body;
+    if (source.endsWith('.html')) {
+      // HTML fragments are explicitly trusted repository content, like public HTML/scripts.
+      const fragment = parseFragment(content, { onParseError: e => { throw new Error(`Invalid HTML fragment ${source}: ${e.code}`); } });
+      function rebase(node) {
+        for (const attr of node.attrs || []) if (['href', 'src', 'poster'].includes(attr.name) && attr.value.startsWith('/') && !attr.value.startsWith('//')) attr.value = relative(current, attr.value.slice(1));
+        for (const child of node.childNodes || []) rebase(child);
+      }
+      rebase(fragment); body = serialize(fragment);
+    } else body = md.render(content);
+    add(current, layout(config, page, locale, actualLocale, body, preview));
   }
   for (const [folder, destination] of [['assets', 'assets/product/'], ['public', '']]) {
     const root = path.join(site, folder);

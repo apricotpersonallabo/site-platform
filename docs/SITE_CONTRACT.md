@@ -125,3 +125,19 @@ During migration, `docs/` remains production; `site/` is a candidate. Do not add
 production callers until a separate cutover review verifies each product's content,
 translations, assets and interactive features. Do not write output over `docs/`.
 No product repository or production setting is changed by platform CI.
+
+## Interactive product content
+
+A page source (including a locale source) ending in `.html` is a trusted **body
+fragment**, rendered inside the shared article. Other sources are Markdown and
+continue to escape raw HTML. HTML fragments can contain product-owned native
+forms, tables and stable section IDs. Do not copy document/head/header/footer
+shells or shared styles into fragments. Leading-slash href/src/poster values
+are rebased in the same way as Markdown links.
+
+Optional `pages[].scripts` lists local output-root `.js` paths, loaded with defer
+on that page in every locale, e.g. `["assets/product/playground.js"]`. Supply those
+files through assets/public. Scripts own product interactions; shared navigation
+and language switching remain platform-owned. These repository-authored HTML and
+scripts are trusted executable content; never use untrusted user input as sources.
+The output checker verifies their local file references before deployment.
