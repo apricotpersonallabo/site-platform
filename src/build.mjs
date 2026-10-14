@@ -36,7 +36,7 @@ function layout(config, page, locale, actualLocale, body, preview) {
   return `<!doctype html>
 <html lang="${locale}"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="${escape(config.product.description)}">
+<meta name="description" content="${escape(page.locales?.[locale]?.description || page.description || config.product.description)}">
 <title>${escape(titleFor(page, locale))} | ${escape(config.product.name)}</title>
 <link rel="stylesheet" href="${relative(current, 'assets/site.css')}">
 ${config.favicon ? `<link rel="icon" href="${escape(relative(current, config.favicon))}">` : ''}

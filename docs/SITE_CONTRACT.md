@@ -141,3 +141,6 @@ files through assets/public. Scripts own product interactions; shared navigation
 and language switching remain platform-owned. These repository-authored HTML and
 scripts are trusted executable content; never use untrusted user input as sources.
 The output checker verifies their local file references before deployment.
+
+Optional `pages[].description` and `pages[].locales[locale].description` localize
+the page meta description; fallback is the base page description, then product.description.

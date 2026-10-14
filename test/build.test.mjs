@@ -79,10 +79,12 @@ test('trusted HTML fragments preserve native forms, locale roots and deferred lo
   const s = await setup(t);
   s.config.pages[0].source = 'content/ja/form.html';
   s.config.pages[0].scripts = ['assets/product/form.js'];
+  s.config.pages[0].locales.en.description = 'English page summary';
   await fs.writeFile(path.join(s.site,'content/ja/form.html'),'<h1>Form</h1><form><label for="choice">Choice</label><select id="choice"><option>One</option></select></form><img alt="Screen" src="/assets/product/screenshot.svg">');
   await fs.writeFile(path.join(s.site,'assets/form.js'),'document.body.dataset.ready="true";');
   await s.save(); await build(s); await check(s.out);
   const html = await fs.readFile(path.join(s.out,'fr/index.html'),'utf8');
+  assert.match(await fs.readFile(path.join(s.out,'en/index.html'),'utf8'), /name="description" content="English page summary"/);
   assert.match(html, /<select id="choice">/);
   assert.match(html, /src="..\/assets\/product\/form.js" defer/);
   assert.match(html, /src="..\/assets\/product\/screenshot.svg"/);
