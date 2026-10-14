@@ -1,9 +1,9 @@
 :root {
   color-scheme: light;
   --site-primary: #183153;
-  --site-accent: #dc681c;
+  --site-accent: #a7440a;
   --site-ink: #172033;
-  --site-muted: #68738a;
+  --site-muted: #586277;
   --site-canvas: #f7f8fa;
   --site-surface: #ffffff;
   --site-line: #dfe3e9;
@@ -42,3 +42,6 @@ article code { padding: .1rem .35rem; border-radius: .3rem; background: #eef1f5;
   .header-inner, .footer-inner { align-items: flex-start; flex-direction: column; padding-block: 1rem; }
   .site-header { position: static; }
 }
+
+article img, article video { max-width: 100%; height: auto; }
+article { overflow-wrap: anywhere; }

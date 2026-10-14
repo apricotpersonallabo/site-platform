@@ -1,0 +1,30 @@
+name: Platform CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+  preview-contract:
+    uses: ./.github/workflows/site-preview.yml
+    with:
+      site-directory: test/fixtures/site
+  deploy-disabled:
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages-deploy.yml
+    with:
+      site-directory: test/fixtures/site
