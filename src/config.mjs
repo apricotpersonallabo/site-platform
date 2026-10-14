@@ -16,6 +16,7 @@ export function validateConfig(config) {
   if (!config.pages.some(p => p.slug === 'index')) throw new Error('pages must include index');
   if (new Set(config.pages.map(p => p.slug)).size !== config.pages.length) throw new Error('Duplicate page slug');
   for (const page of config.pages) {
+    for (const script of page.scripts || []) if (script.split('/').some(part => !part || part === '..' || part === '.')) throw new Error('Invalid page script path');
     for (const locale of Object.keys(page.locales || {})) {
       if (!languages.includes(locale)) throw new Error(`Undeclared locale: ${locale}`);
     }

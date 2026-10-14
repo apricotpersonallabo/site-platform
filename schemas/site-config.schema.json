@@ -113,10 +113,26 @@
                 "source": {
                   "type": "string",
                   "minLength": 1
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 1
                 }
               },
               "additionalProperties": false
             }
+          },
+          "scripts": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9/_.-]*\\.js$"
+            }
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
           }
         },
         "additionalProperties": true
