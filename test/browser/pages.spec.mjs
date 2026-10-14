@@ -18,6 +18,7 @@ test('all generated pages load, navigate, and pass automated WCAG checks', async
   page.on('response',r=>{if(r.status()>=400) errors.push(`${r.status()} ${r.url()}`);});
   const routes=await pages(out);
   expect(routes.length).toBeGreaterThan(0);
+  test.setTimeout(Math.max(30000, routes.length * 15000));
   for(const route of routes) {
     await page.goto(route);
     await expect(page.locator('main')).toBeVisible();
