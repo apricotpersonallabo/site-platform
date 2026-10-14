@@ -1,0 +1,47 @@
+name: Reusable site preview
+
+on:
+  workflow_call:
+    inputs:
+      site-directory:
+        description: Product repository site source directory
+        required: false
+        type: string
+        default: site
+      artifact-name:
+        description: Artifact name for the generated preview
+        required: false
+        type: string
+        default: site-preview
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout product repository
+        uses: actions/checkout@v4
+
+      - name: Checkout shared site platform
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          path: .site-platform-host
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Build migration preview
+        run: node .site-platform-host/src/build.mjs --site "${{ inputs.site-directory }}" --out site-dist
+
+      - name: Upload migration preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: "${{ inputs.artifact-name }}"
+          path: site-dist
+          if-no-files-found: error
